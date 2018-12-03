@@ -1,0 +1,7 @@
+﻿  main.cpp
+c:\users\user\source\repos\project3260\project3260\main.cpp(258): warning C4244: “+=”: 从“float”转换到“int”，可能丢失数据
+c:\users\user\source\repos\project3260\project3260\main.cpp(274): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+c:\users\user\source\repos\project3260\project3260\main.cpp(567): warning C4305: “+=”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(700): warning C4267: “=”: 从“size_t”转换到“GLuint”，可能丢失数据
+c:\users\user\source\repos\project3260\project3260\main.cpp(787): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+  project3260.vcxproj -> C:\Users\user\source\repos\project3260\x64\Debug\project3260.exe
