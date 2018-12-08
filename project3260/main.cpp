@@ -1,6 +1,6 @@
 /************************
 SID: 1155046896 & 1155091693
-Name :Jin Miamu & Cheng Brian Wing Hang
+Name :Jin Xiamu & Cheng Brian Wing Hang
 **************************/
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -32,6 +32,7 @@ const int outside = 8;
 
 //storing the index of the entities
 int SpaceCraft;
+
 int Planet1, Planet2;
 int RingOri, RingStop;
 int RockOri, RockStop;
@@ -41,6 +42,15 @@ const float rockvelocity = 0.02f;
 const float planeRotAng = 0.002f;
 const float ringspin = 0.002f;
 const float rockspin = 0.001f;
+
+int Planet1_ID;
+int Planet1_texture;
+vec3 Planet1_location;
+glm::mat4 Planet1_transform;
+float Planet1_colRadius;
+int Planet1_colHandler;
+int Planet1_status;
+glm::mat4 Planet1_scale;
 
 
 //stroring gobal game state variables
@@ -80,7 +90,6 @@ typedef struct structure {
 
 structure* structureList[400];
 int structureCount = 0;
-
 
 //custom function prototypes
 void bufferObject(int objectID, const char * Path);
@@ -475,6 +484,11 @@ mat4 LookAtRH(vec3 eye, vec3 target, vec3 up)
 	return (orientation * translation);
 }
 
+void drawPlanet1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
+	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
+	modelTransformMatrix = glm::translate(mat4(), glm::vec3(Planet1_location.x, Planet1_location.y, Planet1_location.z)) * Planet1_transform * Planet1_scale;
+	drawTextureObject(Planet1_ID, Planet1_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
+}
 
 
 
@@ -531,7 +545,7 @@ void paintGL(void)
 	}
 
 	//rotate the planets
-	structureList[Planet1]->transform = glm::rotate(mat4(), planeRotAng, glm::vec3(0.0f, 1.0f, 0.0f)) *  structureList[Planet1]->transform;
+	Planet1_transform = glm::rotate(mat4(), planeRotAng, glm::vec3(0.0f, 1.0f, 0.0f)) *  Planet1_transform;
 	structureList[Planet2]->transform = glm::rotate(mat4(), planeRotAng, glm::vec3(0.0f, 1.0f, 0.0f)) *  structureList[Planet2]->transform;
 
 	for (int i = RingOri; i <= RingStop; i++) {
@@ -549,6 +563,10 @@ void paintGL(void)
 			}
 		}
 
+	}
+
+	if (Planet1_status & seeable) {
+		drawPlanet1(viewMatrix, projectionMatrix);
 	}
 
 	//post drawing upkeeping
@@ -707,6 +725,7 @@ int initstructure(int ObjId, int texture, int x, int y, int z, glm::mat4 transfo
 	return structureCount - 1;
 }
 
+
 int initRock(float radiusMin, float radiusMax, float vOffset, vec3 centre) {
 	float turnx, turny, turnz;
 	turnx = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 360;
@@ -751,7 +770,16 @@ void initialiseEntities() {
 	srand(time(NULL));
 	SpaceCraft = initstructure(1, 2, 0, 10, 0, 4.5f, 1); //the plane
 														 //structureList[Plane]->scale = glm::scale(glm::mat4(), glm::vec3(0.01, 0.01, 0.01));
-	Planet1 = initstructure(4, 5, -100, 10, 0, 23.0f, 2); // the earth
+	//Planet1 = initstructure(4, 5, -100, 10, 0, 23.0f, 2); // the earth
+	Planet1_ID = 4;
+	Planet1_texture = 5;
+	Planet1_location = vec3(-100, 10, 0);
+	glm::mat4 Plaent1_transform = glm::mat4(1.0f);
+	Planet1_colRadius = 23.0f;
+	Planet1_colHandler = 2;
+	Planet1_status = seeable | hittable;
+	Planet1_scale = mat4(1.0f);
+
 
 	Planet2 = initstructure(4, 3, +100, 10, 0, 23.0f, 2); // the wonder planet
 	lightsource = initstructure(6, 9, 0, 30, 0, 2.0f, 0); // sphere that indicate light position
