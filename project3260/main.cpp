@@ -43,14 +43,14 @@ const float planeRotAng = 0.002f;
 const float ringspin = 0.002f;
 const float rockspin = 0.001f;
 
-int Planet1_ID;
-int Planet1_texture;
-vec3 Planet1_location;
-glm::mat4 Planet1_transform;
-float Planet1_colRadius;
-int Planet1_colHandler;
-int Planet1_status;
-glm::mat4 Planet1_scale;
+int Planet1_ID, Planet2_ID, SC_ID;
+int Planet1_texture, Planet2_texture, SC_texture;
+vec3 Planet1_location, Planet2_location, SC_location;
+glm::mat4 Planet1_transform, Planet2_transform, SC_transform;
+float Planet1_colRadius, Planet2_colRadius, SC_colRadius;
+int Planet1_colHandler, Planet2_colHandler, SC_colHandler;
+int Planet1_status, Planet2_status, SC_status;
+glm::mat4 Planet1_scale, Planet2_scale, SC_scale;
 
 
 //stroring gobal game state variables
@@ -96,6 +96,9 @@ void bufferObject(int objectID, const char * Path);
 void LightSetup();
 void drawTextureObject(int index, int Texture, glm::mat4 transformMatrix, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 int initstructure(int ObjId, int texture, int x, int y, int z, float radius, int collisionHandler);
+void drawPlanet1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+void drawPlanet2(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+void drawSpaceCraft(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 void drawstructure(structure* e, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 int checkCollision(structure * e1, structure * e2);
 int handleCollision(structure * primary, structure * secondary);
@@ -245,20 +248,20 @@ void keyboard(unsigned char key, int x, int y)
 
 void move(int key, int x, int y) {
 	if (key == GLUT_KEY_RIGHT) {
-		structureList[SpaceCraft]->location =
-			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(planevelocity, 0.0f, 0.0f, 1.0f));
+		SC_location =
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(planevelocity, 0.0f, 0.0f, 1.0f));
 	}
 	if (key == GLUT_KEY_LEFT) {
-		structureList[SpaceCraft]->location =
-			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(-planevelocity, 0.0f, 0.0f, 1.0f));
+		SC_location =
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(-planevelocity, 0.0f, 0.0f, 1.0f));
 	}
 	if (key == GLUT_KEY_UP) {
-		structureList[SpaceCraft]->location =
-			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, 0.0f, -planevelocity, 1.0f));
+		SC_location =
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, -planevelocity, 1.0f));
 	}
 	if (key == GLUT_KEY_DOWN) {
-		structureList[SpaceCraft]->location =
-			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, 0.0f, planevelocity, 1.0f));
+		SC_location =
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, planevelocity, 1.0f));
 	}
 }
 int oldx = 0;
@@ -269,7 +272,7 @@ void PassiveMouse(int x, int y)
 	int xoffset = x - glutGet(GLUT_WINDOW_WIDTH) / 2;
 	float angleX = xoffset / (glutGet(GLUT_WINDOW_WIDTH) / 2.0) * 90.0;
 	glutWarpPointer(glutGet(GLUT_WINDOW_WIDTH) / 2, glutGet(GLUT_WINDOW_HEIGHT) / 2);
-	structureList[SpaceCraft]->transform *= glm::rotate(glm::mat4(1.0f), glm::radians(angleX), glm::vec3(0.0f, 1.0f, 0.0f));
+	SC_transform *= glm::rotate(glm::mat4(1.0f), glm::radians(angleX), glm::vec3(0.0f, 1.0f, 0.0f));
 
 }
 
@@ -484,14 +487,6 @@ mat4 LookAtRH(vec3 eye, vec3 target, vec3 up)
 	return (orientation * translation);
 }
 
-void drawPlanet1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
-	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
-	modelTransformMatrix = glm::translate(mat4(), glm::vec3(Planet1_location.x, Planet1_location.y, Planet1_location.z)) * Planet1_transform * Planet1_scale;
-	drawTextureObject(Planet1_ID, Planet1_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
-}
-
-
-
 void paintGL(void)
 {
 	//General Upkeepings
@@ -514,8 +509,8 @@ void paintGL(void)
 	structureList[lightsource2]->location = lightPosition2;
 	//make the camera follow the plane
 	//camPos = vec3(glm::translate(glm::mat4(), vec3(0.0f, +10.0f, +10.0f)) * glm::vec4(structureList[SpaceCraft]->location,0.0));
-	camPos = vec3(structureList[SpaceCraft]->transform * glm::translate(glm::mat4(), vec3(0.0f, +5.0f, +5.0f)) * glm::vec4(1.0));
-	camPos = vec3(glm::translate(glm::mat4(), structureList[SpaceCraft]->location) * glm::vec4(camPos, 1.0));
+	camPos = vec3(SC_transform * glm::translate(glm::mat4(), vec3(0.0f, +5.0f, +5.0f)) * glm::vec4(1.0));
+	camPos = vec3(glm::translate(glm::mat4(), SC_location) * glm::vec4(camPos, 1.0));
 	//camPos = vec3(glm::translate(glm::mat4(), structureList[SpaceCraft]->location) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, +10.0f, +10.0f,1.0));
 	//camPos = vec3(x, x, x);
 
@@ -525,7 +520,7 @@ void paintGL(void)
 	glUniform4fv(eyePosUniformLocation, 1, &campos4v[0]);
 
 	//set up view matrix
-	glm::mat4 viewMatrix = LookAtRH(camPos, structureList[SpaceCraft]->location, vec3(0.0f, 1.0f, 0.0f));//glm::mat4(1.0f);
+	glm::mat4 viewMatrix = LookAtRH(camPos, SC_location, vec3(0.0f, 1.0f, 0.0f));//glm::mat4(1.0f);
 																										 //viewMatrix = glm::translate(mat4(), -camPos) * viewMatrix;
 																										 //viewMatrix = glm::inverse(structureList[Plane]->transform) * viewMatrix;//glm::rotate(mat4(), glm::radians(camY), glm::vec3(0.0f, 0.0f, 1.0f));
 																										 //viewMatrix = glm::rotate(mat4(), glm::radians(camX), glm::vec3(1.0f, 0.0f, 0.0f)) * viewMatrix;
@@ -546,7 +541,7 @@ void paintGL(void)
 
 	//rotate the planets
 	Planet1_transform = glm::rotate(mat4(), planeRotAng, glm::vec3(0.0f, 1.0f, 0.0f)) *  Planet1_transform;
-	structureList[Planet2]->transform = glm::rotate(mat4(), planeRotAng, glm::vec3(0.0f, 1.0f, 0.0f)) *  structureList[Planet2]->transform;
+	Planet2_transform = glm::rotate(mat4(), planeRotAng, glm::vec3(0.0f, 1.0f, 0.0f)) *  Planet2_transform;
 
 	for (int i = RingOri; i <= RingStop; i++) {
 		structureList[i]->transform = glm::rotate(mat4(), ringspin, glm::vec3(0.0f, 1.0f, 0.0f)) *  structureList[i]->transform;
@@ -565,8 +560,14 @@ void paintGL(void)
 
 	}
 
+	if (SC_status & seeable) {
+		drawSpaceCraft(viewMatrix, projectionMatrix);
+	}
 	if (Planet1_status & seeable) {
 		drawPlanet1(viewMatrix, projectionMatrix);
+	}
+	if (Planet2_status & seeable) {
+		drawPlanet2(viewMatrix, projectionMatrix);
 	}
 
 	//post drawing upkeeping
@@ -756,6 +757,24 @@ void drawstructure(structure* e, glm::mat4 viewMatrix, glm::mat4 projectionMatri
 	drawTextureObject(e->ObjId, e->texture, modelTransformMatrix, viewMatrix, projectionMatrix);
 }
 
+void drawPlanet1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
+	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
+	modelTransformMatrix = glm::translate(mat4(), glm::vec3(Planet1_location.x, Planet1_location.y, Planet1_location.z)) * Planet1_transform * Planet1_scale;
+	drawTextureObject(Planet1_ID, Planet1_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
+}
+
+void drawPlanet2(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
+	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
+	modelTransformMatrix = glm::translate(mat4(), glm::vec3(Planet2_location.x, Planet2_location.y, Planet2_location.z)) * Planet2_transform * Planet2_scale;
+	drawTextureObject(Planet2_ID, Planet2_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
+}
+
+void drawSpaceCraft(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
+	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
+	modelTransformMatrix = glm::translate(mat4(), glm::vec3(SC_location.x, SC_location.y, SC_location.z)) * SC_transform * SC_scale;
+	drawTextureObject(SC_ID, SC_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
+}
+
 void initializedGL(void) //run only once
 {
 	glewInit();
@@ -768,20 +787,38 @@ void initializedGL(void) //run only once
 void initialiseEntities() {
 
 	srand(time(NULL));
-	SpaceCraft = initstructure(1, 2, 0, 10, 0, 4.5f, 1); //the plane
+	//SpaceCraft = initstructure(1, 2, 0, 10, 0, 4.5f, 1); //the plane
 														 //structureList[Plane]->scale = glm::scale(glm::mat4(), glm::vec3(0.01, 0.01, 0.01));
+	SC_ID = 1;
+	SC_texture = 2;
+	SC_location = vec3(0, 10, 0);
+	SC_transform = glm::mat4(1.0f);
+	SC_colRadius = 4.5f;
+	SC_colHandler = 1;
+	SC_status = seeable | hittable;
+	SC_scale = mat4(1.0f);
+
 	//Planet1 = initstructure(4, 5, -100, 10, 0, 23.0f, 2); // the earth
 	Planet1_ID = 4;
 	Planet1_texture = 5;
 	Planet1_location = vec3(-100, 10, 0);
-	glm::mat4 Plaent1_transform = glm::mat4(1.0f);
+	Planet1_transform = glm::mat4(1.0f);
 	Planet1_colRadius = 23.0f;
 	Planet1_colHandler = 2;
 	Planet1_status = seeable | hittable;
 	Planet1_scale = mat4(1.0f);
 
 
-	Planet2 = initstructure(4, 3, +100, 10, 0, 23.0f, 2); // the wonder planet
+	//Planet2 = initstructure(4, 3, +100, 10, 0, 23.0f, 2); // the wonder planet
+	Planet2_ID = 4;
+	Planet2_texture = 3;
+	Planet2_location = vec3(+100, 10, 0);
+	Planet2_transform = glm::mat4(1.0f);
+	Planet2_colRadius = 23.0f;
+	Planet2_colHandler = 2;
+	Planet2_status = seeable | hittable;
+	Planet2_scale = mat4(1.0f);
+
 	lightsource = initstructure(6, 9, 0, 30, 0, 2.0f, 0); // sphere that indicate light position
 	lightPosition = vec3(0.0f, 40.0f, 0.0f);
 	structureList[lightsource]->scale = glm::scale(glm::mat4(), glm::vec3(0.15, 0.15, 0.15));
@@ -793,7 +830,7 @@ void initialiseEntities() {
 
 	RockOri = structureCount; //initialise all the rocks
 	for (int i = 0; i < 200; i++) {
-		RockStop = initRock(60.0f, 90.0f, 7.0f, structureList[Planet2]->location);
+		RockStop = initRock(60.0f, 90.0f, 7.0f, Planet2_location);
 	}
 
 	RingOri = structureCount;//initialise all the rings
@@ -851,12 +888,9 @@ int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
 	glutInitWindowSize(900, 900);
-	glutCreateWindow("Assignment 2");
+	glutCreateWindow("CSCI3260 Project");
 	initialiseEntities();
-	//TODO:
-	/*Register different CALLBACK function for GLUT to response
-	with different events, e.g. window sizing, mouse click or
-	keyboard stroke */
+	
 	initializedGL();
 	glutDisplayFunc(paintGL);
 
