@@ -1,14 +1,14 @@
 ﻿  main.cpp
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(52): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(53): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(54): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(55): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(236): warning C4305: '-=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(240): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(244): warning C4305: '-=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(248): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(276): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(503): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(677): warning C4267: '=': conversion from 'size_t' to 'GLuint', possible loss of data
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(766): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  project3260.vcxproj -> C:\Users\Brian\Documents\GitHub\Sam-s-Project\x64\Debug\project3260.exe
+c:\users\user\source\repos\project3260\project3260\main.cpp(62): warning C4305: “初始化”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(63): warning C4305: “初始化”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(64): warning C4305: “初始化”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(65): warning C4305: “初始化”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(245): warning C4305: “-=”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(249): warning C4305: “+=”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(253): warning C4305: “-=”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(257): warning C4305: “+=”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(285): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+c:\users\user\source\repos\project3260\project3260\main.cpp(517): warning C4305: “+=”: 从“double”到“float”截断
+c:\users\user\source\repos\project3260\project3260\main.cpp(695): warning C4267: “=”: 从“size_t”转换到“GLuint”，可能丢失数据
+c:\users\user\source\repos\project3260\project3260\main.cpp(785): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+  project3260.vcxproj -> C:\Users\user\source\repos\project3260\x64\Debug\project3260.exe
