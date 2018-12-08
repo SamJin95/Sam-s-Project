@@ -1,26 +1,26 @@
-#version 430
+#version 430//GLSL version your computer supports
+/************************
+SID: 1155046896 & 1155091693
+Name :Jin Xiamu & Cheng Brian Wing Hang
+**************************/
 
-in layout(location=0) vec3 position;
-in layout(location=1) vec2 vertexUV;
-in layout(location=2) vec3 normal;
+in layout(location=0) vec3 pos;
+in layout(location=1) vec2 vUV;
+in layout(location=2) vec3 vnormal;
 
 uniform mat4 modelTransformMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 out vec2 UV;
-out vec3 normalWorld;
-out vec3 vertexPositionWorld;
+out vec3 normalsky;
+out vec3 VertexLocation;
 
 void main()
-{
-	vec4 v = vec4(position, 1.0);
-	vec4 new_position = modelTransformMatrix * v;
-	gl_Position = projectionMatrix * viewMatrix  * new_position;	
-	UV = vertexUV;
-
-	vec4 normal_temp =   modelTransformMatrix * vec4 (normal, 0);
-	normalWorld = normal_temp.xyz;
-	vertexPositionWorld = new_position.xyz;
+{	
+	gl_Position = projectionMatrix * viewMatrix  * modelTransformMatrix * vec4(pos, 1.0);	
+	normalsky = (modelTransformMatrix * vec4 (vnormal, 0)).xyz;
+	VertexLocation = (modelTransformMatrix * vec4(pos, 1.0)).xyz;
+	UV = vUV;
 }
 

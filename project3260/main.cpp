@@ -243,10 +243,11 @@ void keyboard(unsigned char key, int x, int y)
 	
 }
 
-void move(int key, int x, int y) {
+void SpecialKeys(int key, int x, int y) {
 	if (key == GLUT_KEY_RIGHT) {
 		structureList[SpaceCraft]->location =
 			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(planevelocity, 0.0f, 0.0f, 1.0f));
+	
 	}
 	if (key == GLUT_KEY_LEFT) {
 		structureList[SpaceCraft]->location =
@@ -261,15 +262,13 @@ void move(int key, int x, int y) {
 			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, 0.0f, planevelocity, 1.0f));
 	}
 }
-int oldx = 0;
-float r = 0.0f;
+ 
 void PassiveMouse(int x, int y)
 {
-	//TODO: Use Mouse to do interactive events and animation
-	int xoffset = x - glutGet(GLUT_WINDOW_WIDTH) / 2;
-	float angleX = xoffset / (glutGet(GLUT_WINDOW_WIDTH) / 2.0) * 90.0;
-	glutWarpPointer(glutGet(GLUT_WINDOW_WIDTH) / 2, glutGet(GLUT_WINDOW_HEIGHT) / 2);
-	structureList[SpaceCraft]->transform *= glm::rotate(glm::mat4(1.0f), glm::radians(angleX), glm::vec3(0.0f, 1.0f, 0.0f));
+	int xoffset = x - 450;
+	float angleX = xoffset / 450.0 * 90.0;
+	glutWarpPointer(450, 450);
+	structureList[SpaceCraft]->transform *= glm::rotate(glm::mat4(1.0f), glm::radians(-angleX), glm::vec3(0.0f, 0.8f, 0.0f));
 
 }
 
@@ -279,7 +278,7 @@ bool loadOBJ(
 	std::vector<glm::vec2> & out_uvs,
 	std::vector<glm::vec3> & out_normals
 ) {
-	printf("Loading OBJ file %s...\n", path);
+	printf("Load OBJ file %s...\n", path);
 
 	std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
 	std::vector<glm::vec3> temp_vertices;
@@ -289,7 +288,7 @@ bool loadOBJ(
 
 	FILE * file = fopen(path, "r");
 	if (file == NULL) {
-		printf("Impossible to open the file ! Are you in the right path ? See Tutorial 6 for details\n");
+		printf("Cannot open file\n");
 		getchar();
 		return false;
 	}
@@ -297,6 +296,7 @@ bool loadOBJ(
 	while (1) {
 
 		char lineHeader[128];
+		// read the first word of the line
 		int res = fscanf(file, "%s", lineHeader);
 		if (res == EOF)
 			break; // EOF = End Of File. Quit the loop.
@@ -311,7 +311,7 @@ bool loadOBJ(
 		else if (strcmp(lineHeader, "vt") == 0) {
 			glm::vec2 uv;
 			fscanf(file, "%f %f\n", &uv.x, &uv.y);
-			uv.y = -uv.y;
+			uv.y = -uv.y; // Invert V coordinate since we will only use DDS texture, which are inverted. Remove if you want to use TGA or BMP loaders.
 			temp_uvs.push_back(uv);
 		}
 		else if (strcmp(lineHeader, "vn") == 0) {
@@ -324,7 +324,7 @@ bool loadOBJ(
 			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
 			int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
 			if (matches != 9) {
-				printf("File can't be read by our simple parser :-( Try exporting with other options\n");
+				printf("Cannot read File\n");
 				return false;
 			}
 			vertexIndices.push_back(vertexIndex[0]);
@@ -338,8 +338,9 @@ bool loadOBJ(
 			normalIndices.push_back(normalIndex[2]);
 		}
 		else {
-			char stupidBuffer[1000];
-			fgets(stupidBuffer, 1000, file);
+
+			char wrongbuff[1000];
+			fgets(wrongbuff, 1000, file);
 		}
 
 	}
@@ -366,7 +367,6 @@ bool loadOBJ(
 
 	return true;
 }
-
 
 
 GLuint loadBMP_custom(const char * imagepath) {
@@ -450,40 +450,6 @@ void sendDataToOpenGL()
 	glutSetCursor(GLUT_CURSOR_NONE);
 }
 
-mat4 LookAtRH(vec3 eye, vec3 target, vec3 up)
-{
-	vec3 zaxis = glm::normalize(eye - target);    // The "forward" vector.
-	vec3 xaxis = glm::normalize(cross(up, zaxis));// The "right" vector.
-	vec3 yaxis = cross(zaxis, xaxis);     // The "up" vector.
-
-										  // Create a 4x4 orientation matrix from the right, up, and forward vectors
-										  // This is transposed which is equivalent to performing an inverse 
-										  // if the matrix is orthonormalized (in this case, it is).
-	mat4 orientation = {
-		glm::vec4(xaxis.x, yaxis.x, zaxis.x, 0),
-		glm::vec4(xaxis.y, yaxis.y, zaxis.y, 0),
-		glm::vec4(xaxis.z, yaxis.z, zaxis.z, 0),
-		glm::vec4(0,       0,       0,     1)
-	};
-
-	// Create a 4x4 translation matrix.
-	// The eye position is negated which is equivalent
-	// to the inverse of the translation matrix. 
-	// T(v)^-1 == T(-v)
-	mat4 translation = {
-		glm::vec4(1,      0,      0,   0),
-		glm::vec4(0,      1,      0,   0),
-		glm::vec4(0,      0,      1,   0),
-		glm::vec4(-eye.x, -eye.y, -eye.z, 1)
-	};
-
-	// Combine the orientation and translation to compute 
-	// the final view matrix. Note that the order of 
-	// multiplication is reversed because the matrices
-	// are already inverted.
-	return (orientation * translation);
-}
-
 void drawPlanet1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
 	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
 	modelTransformMatrix = glm::translate(mat4(), glm::vec3(Planet1_location.x, Planet1_location.y, Planet1_location.z)) * Planet1_transform * Planet1_scale;
@@ -514,23 +480,18 @@ void paintGL(void)
 	structureList[lightsource2]->location = lightPosition2;
 	//make the camera follow the plane
 	//camPos = vec3(glm::translate(glm::mat4(), vec3(0.0f, +10.0f, +10.0f)) * glm::vec4(structureList[SpaceCraft]->location,0.0));
-	camPos = vec3(structureList[SpaceCraft]->transform * glm::translate(glm::mat4(), vec3(0.0f, +5.0f, +5.0f)) * glm::vec4(1.0));
+	camPos = vec3(structureList[SpaceCraft]->transform * glm::translate(glm::mat4(), vec3(0.0f, +2.0f, +10.0f)) * glm::vec4(1.0));
 	camPos = vec3(glm::translate(glm::mat4(), structureList[SpaceCraft]->location) * glm::vec4(camPos, 1.0));
 	//camPos = vec3(glm::translate(glm::mat4(), structureList[SpaceCraft]->location) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, +10.0f, +10.0f,1.0));
 	//camPos = vec3(x, x, x);
 
 	//send eye position
-	GLint eyePosUniformLocation = glGetUniformLocation(PID, "eyePositionWorld");
+	GLint eyePosUniformLocation = glGetUniformLocation(PID, "LookLocation");
 	glm::vec4 campos4v = glm::vec4(camPos, 0.0);
 	glUniform4fv(eyePosUniformLocation, 1, &campos4v[0]);
 
-	//set up view matrix
-	glm::mat4 viewMatrix = LookAtRH(camPos, structureList[SpaceCraft]->location, vec3(0.0f, 1.0f, 0.0f));//glm::mat4(1.0f);
-																										 //viewMatrix = glm::translate(mat4(), -camPos) * viewMatrix;
-																										 //viewMatrix = glm::inverse(structureList[Plane]->transform) * viewMatrix;//glm::rotate(mat4(), glm::radians(camY), glm::vec3(0.0f, 0.0f, 1.0f));
-																										 //viewMatrix = glm::rotate(mat4(), glm::radians(camX), glm::vec3(1.0f, 0.0f, 0.0f)) * viewMatrix;
-
-
+	
+	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(camPos), glm::vec3(structureList[SpaceCraft]->location), glm::vec3(0.0f, 1.0f, 0.0f));
 
 
 																										 //make the rock oribts
@@ -577,55 +538,55 @@ void paintGL(void)
 void LightSetup()
 {
 	//Set up lighting information for source 1
-	GLint lightPositonUniformLocation = glGetUniformLocation(PID, "lightPositionWorld");
+	GLint lightPositonUniformLocation = glGetUniformLocation(PID, "LightLocation");
 	glUniform3fv(lightPositonUniformLocation, 1, &lightPosition[0]);
 
-	GLint ambLightUniformLocation = glGetUniformLocation(PID, "ambientLight");
-	glm::vec4 ambientLight(0.25f, 0.25f, 0.25f, 1.0f);
-	glUniform4fv(ambLightUniformLocation, 1, &ambientLight[0]);
+	GLint ambLightUniformLocation = glGetUniformLocation(PID, "ambiLight");
+	glm::vec4 ambiLight(0.25f, 0.25f, 0.25f, 1.0f);
+	glUniform4fv(ambLightUniformLocation, 1, &ambiLight[0]);
 
 
-	GLint diffuseLightUniformLocation = glGetUniformLocation(PID, "diffuseLight");
-	glm::vec4 diffuseLight(diffuse, diffuse, diffuse, 0.0f);
-	glUniform4fv(diffuseLightUniformLocation, 1, &diffuseLight[0]);
+	GLint difLightUniformLocation = glGetUniformLocation(PID, "difLight");
+	glm::vec4 difLight(diffuse, diffuse, diffuse, 0.0f);
+	glUniform4fv(difLightUniformLocation, 1, &difLight[0]);
 
-	GLint specularLightUniformLocation = glGetUniformLocation(PID, "specularLight");
-	glm::vec4 specularLight(specular, specular, specular, 0.0f);
-	glUniform4fv(specularLightUniformLocation, 1, &specularLight[0]);
+	GLint speLightUniformLocation = glGetUniformLocation(PID, "speLight");
+	glm::vec4 speLight(specular, specular, specular, 0.0f);
+	glUniform4fv(speLightUniformLocation, 1, &speLight[0]);
 
 	//light souce 2
-	GLint lightPositonUniformLocation2 = glGetUniformLocation(PID, "lightPositionWorld2");
+	GLint lightPositonUniformLocation2 = glGetUniformLocation(PID, "LightLocation2");
 	glUniform3fv(lightPositonUniformLocation2, 1, &lightPosition2[0]);
 
-	GLint diffuseLightUniformLocation2 = glGetUniformLocation(PID, "diffuseLight2");
-	glm::vec4 diffuseLight2(diffuse2 / 2, diffuse2 / 2, diffuse2, 0.0f);
-	glUniform4fv(diffuseLightUniformLocation2, 1, &diffuseLight2[0]);
+	GLint difLightUniformLocation2 = glGetUniformLocation(PID, "difLight2");
+	glm::vec4 difLight2(diffuse2 / 2, diffuse2 / 2, diffuse2, 0.0f);
+	glUniform4fv(difLightUniformLocation2, 1, &difLight2[0]);
 
-	GLint specularLightUniformLocation2 = glGetUniformLocation(PID, "specularLight2");
-	glm::vec4 specularLight2(specular2 / 2, specular2 / 2, specular2 / 2, 0.0f);
-	glUniform4fv(specularLightUniformLocation2, 1, &specularLight2[0]);
+	GLint speLightUniformLocation2 = glGetUniformLocation(PID, "speLight2");
+	glm::vec4 speLight2(specular2 / 2, specular2 / 2, specular2 / 2, 0.0f);
+	glUniform4fv(speLightUniformLocation2, 1, &speLight2[0]);
 }
 
 
 void setupCubeLight()
 {
 	//Set up lighting information
-	GLint lightPositonUniformLocation = glGetUniformLocation(PID, "lightPositionWorld");
+	GLint lightPositonUniformLocation = glGetUniformLocation(PID, "LightLocation");
 	glUniform3fv(lightPositonUniformLocation, 1, &lightPosition[0]);
 
-	GLint ambLightUniformLocation = glGetUniformLocation(PID, "ambientLight");
-	glm::vec4 ambientLight(1.0f, 1.0f, 1.0f, 1.0f);
-	glUniform4fv(ambLightUniformLocation, 1, &ambientLight[0]);
+	GLint ambLightUniformLocation = glGetUniformLocation(PID, "ambiLight");
+	glm::vec4 ambiLight(1.0f, 1.0f, 1.0f, 1.0f);
+	glUniform4fv(ambLightUniformLocation, 1, &ambiLight[0]);
 
 
-	GLint diffuseLightUniformLocation = glGetUniformLocation(PID, "diffuseLight");
-	//glm::vec4 diffuseLight(diff, diff, diff, 1.0f);
-	glm::vec4 diffuseLight(0, 0, 0, 1.0f);
-	glUniform4fv(diffuseLightUniformLocation, 1, &diffuseLight[0]);
+	GLint difLightUniformLocation = glGetUniformLocation(PID, "difLight");
+	//glm::vec4 difLight(diff, diff, diff, 1.0f);
+	glm::vec4 difLight(0, 0, 0, 1.0f);
+	glUniform4fv(difLightUniformLocation, 1, &difLight[0]);
 
-	GLint specularLightUniformLocation = glGetUniformLocation(PID, "specularLight");
-	glm::vec4 specularLight(0, 0, 0, 1.0f);
-	glUniform4fv(specularLightUniformLocation, 1, &specularLight[0]);
+	GLint speLightUniformLocation = glGetUniformLocation(PID, "speLight");
+	glm::vec4 speLight(0, 0, 0, 1.0f);
+	glUniform4fv(speLightUniformLocation, 1, &speLight[0]);
 }
 
 void bufferObject(int objectID, const char* Path) {
@@ -851,17 +812,14 @@ int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
 	glutInitWindowSize(900, 900);
-	glutCreateWindow("Assignment 2");
+	glutCreateWindow("3260 project by Sam and Brian");
 	initialiseEntities();
-	//TODO:
-	/*Register different CALLBACK function for GLUT to response
-	with different events, e.g. window sizing, mouse click or
-	keyboard stroke */
+	
 	initializedGL();
 	glutDisplayFunc(paintGL);
 
 	glutKeyboardFunc(keyboard);
-	glutSpecialFunc(move);
+	glutSpecialFunc(SpecialKeys);
 	glutPassiveMotionFunc(PassiveMouse);
 
 	glutMainLoop();
