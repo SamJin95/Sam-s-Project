@@ -248,14 +248,8 @@ void keyboard(unsigned char key, int x, int y)
 
 void SpecialKeys(int key, int x, int y) {
 	if (key == GLUT_KEY_RIGHT) {
-<<<<<<< HEAD
-		structureList[SpaceCraft]->location =
-			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(planevelocity, 0.0f, 0.0f, 1.0f));
-	
-=======
-		SC_location =
+        SC_location =
 			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(planevelocity, 0.0f, 0.0f, 1.0f));
->>>>>>> f6f8a1f766d78b4b883086d25458229ebd2dea9f
 	}
 	if (key == GLUT_KEY_LEFT) {
 		SC_location =
@@ -273,19 +267,10 @@ void SpecialKeys(int key, int x, int y) {
  
 void PassiveMouse(int x, int y)
 {
-<<<<<<< HEAD
 	int xoffset = x - 450;
 	float angleX = xoffset / 450.0 * 90.0;
 	glutWarpPointer(450, 450);
-	structureList[SpaceCraft]->transform *= glm::rotate(glm::mat4(1.0f), glm::radians(-angleX), glm::vec3(0.0f, 0.8f, 0.0f));
-=======
-	//TODO: Use Mouse to do interactive events and animation
-	int xoffset = x - glutGet(GLUT_WINDOW_WIDTH) / 2;
-	float angleX = xoffset / (glutGet(GLUT_WINDOW_WIDTH) / 2.0) * 90.0;
-	glutWarpPointer(glutGet(GLUT_WINDOW_WIDTH) / 2, glutGet(GLUT_WINDOW_HEIGHT) / 2);
-	SC_transform *= glm::rotate(glm::mat4(1.0f), glm::radians(angleX), glm::vec3(0.0f, 1.0f, 0.0f));
->>>>>>> f6f8a1f766d78b4b883086d25458229ebd2dea9f
-
+	SC_transform *= glm::rotate(glm::mat4(1.0f), glm::radians(-angleX), glm::vec3(0.0f, 0.8f, 0.0f));
 }
 
 bool loadOBJ(
@@ -466,50 +451,6 @@ void sendDataToOpenGL()
 	glutSetCursor(GLUT_CURSOR_NONE);
 }
 
-<<<<<<< HEAD
-void drawPlanet1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
-	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
-	modelTransformMatrix = glm::translate(mat4(), glm::vec3(Planet1_location.x, Planet1_location.y, Planet1_location.z)) * Planet1_transform * Planet1_scale;
-	drawTextureObject(Planet1_ID, Planet1_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
-}
-
-
-=======
-mat4 LookAtRH(vec3 eye, vec3 target, vec3 up)
-{
-	vec3 zaxis = glm::normalize(eye - target);    // The "forward" vector.
-	vec3 xaxis = glm::normalize(cross(up, zaxis));// The "right" vector.
-	vec3 yaxis = cross(zaxis, xaxis);     // The "up" vector.
-
-										  // Create a 4x4 orientation matrix from the right, up, and forward vectors
-										  // This is transposed which is equivalent to performing an inverse 
-										  // if the matrix is orthonormalized (in this case, it is).
-	mat4 orientation = {
-		glm::vec4(xaxis.x, yaxis.x, zaxis.x, 0),
-		glm::vec4(xaxis.y, yaxis.y, zaxis.y, 0),
-		glm::vec4(xaxis.z, yaxis.z, zaxis.z, 0),
-		glm::vec4(0,       0,       0,     1)
-	};
-
-	// Create a 4x4 translation matrix.
-	// The eye position is negated which is equivalent
-	// to the inverse of the translation matrix. 
-	// T(v)^-1 == T(-v)
-	mat4 translation = {
-		glm::vec4(1,      0,      0,   0),
-		glm::vec4(0,      1,      0,   0),
-		glm::vec4(0,      0,      1,   0),
-		glm::vec4(-eye.x, -eye.y, -eye.z, 1)
-	};
-
-	// Combine the orientation and translation to compute 
-	// the final view matrix. Note that the order of 
-	// multiplication is reversed because the matrices
-	// are already inverted.
-	return (orientation * translation);
-}
->>>>>>> f6f8a1f766d78b4b883086d25458229ebd2dea9f
-
 void paintGL(void)
 {
 	//General Upkeepings
@@ -532,13 +473,8 @@ void paintGL(void)
 	structureList[lightsource2]->location = lightPosition2;
 	//make the camera follow the plane
 	//camPos = vec3(glm::translate(glm::mat4(), vec3(0.0f, +10.0f, +10.0f)) * glm::vec4(structureList[SpaceCraft]->location,0.0));
-<<<<<<< HEAD
-	camPos = vec3(structureList[SpaceCraft]->transform * glm::translate(glm::mat4(), vec3(0.0f, +2.0f, +10.0f)) * glm::vec4(1.0));
-	camPos = vec3(glm::translate(glm::mat4(), structureList[SpaceCraft]->location) * glm::vec4(camPos, 1.0));
-=======
 	camPos = vec3(SC_transform * glm::translate(glm::mat4(), vec3(0.0f, +5.0f, +5.0f)) * glm::vec4(1.0));
 	camPos = vec3(glm::translate(glm::mat4(), SC_location) * glm::vec4(camPos, 1.0));
->>>>>>> f6f8a1f766d78b4b883086d25458229ebd2dea9f
 	//camPos = vec3(glm::translate(glm::mat4(), structureList[SpaceCraft]->location) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, +10.0f, +10.0f,1.0));
 	//camPos = vec3(x, x, x);
 
@@ -547,18 +483,7 @@ void paintGL(void)
 	glm::vec4 campos4v = glm::vec4(camPos, 0.0);
 	glUniform4fv(eyePosUniformLocation, 1, &campos4v[0]);
 
-<<<<<<< HEAD
-	
-	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(camPos), glm::vec3(structureList[SpaceCraft]->location), glm::vec3(0.0f, 1.0f, 0.0f));
-=======
-	//set up view matrix
-	glm::mat4 viewMatrix = LookAtRH(camPos, SC_location, vec3(0.0f, 1.0f, 0.0f));//glm::mat4(1.0f);
-																										 //viewMatrix = glm::translate(mat4(), -camPos) * viewMatrix;
-																										 //viewMatrix = glm::inverse(structureList[Plane]->transform) * viewMatrix;//glm::rotate(mat4(), glm::radians(camY), glm::vec3(0.0f, 0.0f, 1.0f));
-																										 //viewMatrix = glm::rotate(mat4(), glm::radians(camX), glm::vec3(1.0f, 0.0f, 0.0f)) * viewMatrix;
-
-
->>>>>>> f6f8a1f766d78b4b883086d25458229ebd2dea9f
+	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(camPos), glm::vec3(SC_location), glm::vec3(0.0f, 1.0f, 0.0f));
 
 
 																										 //make the rock oribts
@@ -921,11 +846,7 @@ int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
 	glutInitWindowSize(900, 900);
-<<<<<<< HEAD
 	glutCreateWindow("3260 project by Sam and Brian");
-=======
-	glutCreateWindow("CSCI3260 Project");
->>>>>>> f6f8a1f766d78b4b883086d25458229ebd2dea9f
 	initialiseEntities();
 	
 	initializedGL();
