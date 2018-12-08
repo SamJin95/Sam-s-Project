@@ -31,34 +31,28 @@ const int outside = 8;
 
 
 //storing the index of the entities
-int SpaceCraft;
-
-int Planet1, Planet2;
 int RingOri, RingStop;
 int RockOri, RockStop;
-int lightsource, lightsource2;
 float planevelocity = 0.4f;
 const float rockvelocity = 0.02f;
 const float planeRotAng = 0.002f;
 const float ringspin = 0.002f;
 const float rockspin = 0.001f;
 
-int Planet1_ID, Planet2_ID, SC_ID;
-int Planet1_texture, Planet2_texture, SC_texture;
-vec3 Planet1_location, Planet2_location, SC_location;
-glm::mat4 Planet1_transform, Planet2_transform, SC_transform;
+int Planet1_ID, Planet2_ID, SC_ID, LightSource1_ID, LightSource2_ID;
+int Planet1_texture, Planet2_texture, SC_texture, LightSource1_texture, LightSource2_texture;
+vec3 Planet1_location, Planet2_location, SC_location, LightSource1_location, LightSource2_location;
+glm::mat4 Planet1_transform, Planet2_transform, SC_transform, LightSource1_transform, LightSource2_transform;
 float Planet1_colRadius, Planet2_colRadius, SC_colRadius;
 int Planet1_colHandler, Planet2_colHandler, SC_colHandler;
 int Planet1_status, Planet2_status, SC_status;
-glm::mat4 Planet1_scale, Planet2_scale, SC_scale;
+glm::mat4 Planet1_scale, Planet2_scale, SC_scale, LightSource1_scale, LightSource2_scale;
 
 
 //stroring gobal game state variables
 
 glm::vec3 camPos = glm::vec3(0.0, 20.0, 20.0);
 float ax = 0.0f;
-vec3 lightPosition;
-vec3 lightPosition2;
 float diffuse = 0.8; //diffuse light intensity
 float specular = 0.8; //specular light intensity
 float diffuse2 = 0.8; //diffuse light intensity
@@ -96,11 +90,15 @@ void bufferObject(int objectID, const char * Path);
 void LightSetup();
 void drawTextureObject(int index, int Texture, glm::mat4 transformMatrix, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 int initstructure(int ObjId, int texture, int x, int y, int z, float radius, int collisionHandler);
+void drawSpaceCraft(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 void drawPlanet1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 void drawPlanet2(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
-void drawSpaceCraft(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+void drawLightSource1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+void drawLightSource2(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 void drawstructure(structure* e, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 int checkCollision(structure * e1, structure * e2);
+int check_SC_Planet1_Collision();
+int check_SC_Planet2_Collision();
 int handleCollision(structure * primary, structure * secondary);
 int handleExit(structure * primary, structure * secondary);
 int initstructure(int ObjId, int texture, int x, int y, int z, glm::mat4 transform, float radius, int collisionHandler);
@@ -230,13 +228,13 @@ void keyboard(unsigned char key, int x, int y)
 		specular += 0.1;
 	}
 	if (key == 'w')
-		lightPosition = lightPosition + vec3(0.0f, 0.0f, 3.0f);
+		LightSource1_location = LightSource1_location + vec3(0.0f, 0.0f, 3.0f);
 	if (key == 'a')
-		lightPosition = lightPosition + vec3(-3.0f, 0.0f, 0.0f);
+		LightSource1_location = LightSource1_location + vec3(-3.0f, 0.0f, 0.0f);
 	if (key == 's')
-		lightPosition = lightPosition + vec3(0.0f, 0.0f, -3.0f);
+		LightSource1_location = LightSource1_location + vec3(0.0f, 0.0f, -3.0f);
 	if (key == 'd')
-		lightPosition = lightPosition + vec3(3.0f, 0.0f, 0.0f);
+		LightSource1_location = LightSource1_location + vec3(3.0f, 0.0f, 0.0f);
 	if (key == 'u') {
 			diffuse -= 0.1;
 	}
@@ -469,8 +467,6 @@ void paintGL(void)
 
 	//update structure state and location etc
 	//make a sphere follow the light source
-	structureList[lightsource]->location = lightPosition;
-	structureList[lightsource2]->location = lightPosition2;
 	//make the camera follow the plane
 	//camPos = vec3(glm::translate(glm::mat4(), vec3(0.0f, +10.0f, +10.0f)) * glm::vec4(structureList[SpaceCraft]->location,0.0));
 	camPos = vec3(SC_transform * glm::translate(glm::mat4(), vec3(0.0f, +5.0f, +5.0f)) * glm::vec4(1.0));
@@ -521,12 +517,22 @@ void paintGL(void)
 	if (SC_status & seeable) {
 		drawSpaceCraft(viewMatrix, projectionMatrix);
 	}
+
 	if (Planet1_status & seeable) {
 		drawPlanet1(viewMatrix, projectionMatrix);
 	}
+	if (Planet1_status & hittable) {
+		check_SC_Planet1_Collision();
+	}
+
 	if (Planet2_status & seeable) {
 		drawPlanet2(viewMatrix, projectionMatrix);
 	}
+	if (Planet2_status & hittable) {
+		check_SC_Planet2_Collision();
+	}
+	drawLightSource1(viewMatrix, projectionMatrix);
+	drawLightSource2(viewMatrix, projectionMatrix);
 
 	//post drawing upkeeping
 	glFlush();
@@ -537,7 +543,7 @@ void LightSetup()
 {
 	//Set up lighting information for source 1
 	GLint lightPositonUniformLocation = glGetUniformLocation(PID, "LightLocation");
-	glUniform3fv(lightPositonUniformLocation, 1, &lightPosition[0]);
+	glUniform3fv(lightPositonUniformLocation, 1, &LightSource1_location[0]);
 
 	GLint ambLightUniformLocation = glGetUniformLocation(PID, "ambiLight");
 	glm::vec4 ambiLight(0.25f, 0.25f, 0.25f, 1.0f);
@@ -554,7 +560,7 @@ void LightSetup()
 
 	//light souce 2
 	GLint lightPositonUniformLocation2 = glGetUniformLocation(PID, "LightLocation2");
-	glUniform3fv(lightPositonUniformLocation2, 1, &lightPosition2[0]);
+	glUniform3fv(lightPositonUniformLocation2, 1, &LightSource2_location[0]);
 
 	GLint difLightUniformLocation2 = glGetUniformLocation(PID, "difLight2");
 	glm::vec4 difLight2(diffuse2 / 2, diffuse2 / 2, diffuse2, 0.0f);
@@ -570,7 +576,7 @@ void setupCubeLight()
 {
 	//Set up lighting information
 	GLint lightPositonUniformLocation = glGetUniformLocation(PID, "LightLocation");
-	glUniform3fv(lightPositonUniformLocation, 1, &lightPosition[0]);
+	glUniform3fv(lightPositonUniformLocation, 1, &LightSource1_location[0]);
 
 	GLint ambLightUniformLocation = glGetUniformLocation(PID, "ambiLight");
 	glm::vec4 ambiLight(1.0f, 1.0f, 1.0f, 1.0f);
@@ -733,6 +739,18 @@ void drawSpaceCraft(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
 	drawTextureObject(SC_ID, SC_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
 }
 
+void drawLightSource1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
+	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
+	modelTransformMatrix = glm::translate(mat4(), glm::vec3(LightSource1_location.x, LightSource1_location.y, LightSource1_location.z)) * LightSource1_transform * LightSource1_scale;
+	drawTextureObject(LightSource1_ID, LightSource1_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
+}
+
+void drawLightSource2(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
+	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
+	modelTransformMatrix = glm::translate(mat4(), glm::vec3(LightSource2_location.x, LightSource2_location.y, LightSource2_location.z)) * LightSource2_transform * LightSource2_scale;
+	drawTextureObject(LightSource2_ID, LightSource2_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
+}
+
 void initializedGL(void) //run only once
 {
 	glewInit();
@@ -746,7 +764,6 @@ void initialiseEntities() {
 
 	srand(time(NULL));
 	//SpaceCraft = initstructure(1, 2, 0, 10, 0, 4.5f, 1); //the plane
-														 //structureList[Plane]->scale = glm::scale(glm::mat4(), glm::vec3(0.01, 0.01, 0.01));
 	SC_ID = 1;
 	SC_texture = 2;
 	SC_location = vec3(0, 10, 0);
@@ -777,13 +794,19 @@ void initialiseEntities() {
 	Planet2_status = seeable | hittable;
 	Planet2_scale = mat4(1.0f);
 
-	lightsource = initstructure(6, 9, 0, 30, 0, 2.0f, 0); // sphere that indicate light position
-	lightPosition = vec3(0.0f, 40.0f, 0.0f);
-	structureList[lightsource]->scale = glm::scale(glm::mat4(), glm::vec3(0.15, 0.15, 0.15));
+	//lightsource = initstructure(6, 9, 0, 30, 0, 2.0f, 0); // sphere that indicate light position
+	LightSource1_ID = 6;
+	LightSource1_texture = 9;
+	LightSource1_location = vec3(0.0f, 40.0f, 0.0f);
+	LightSource1_transform = glm::mat4(1.0f);
+	LightSource1_scale = glm::scale(glm::mat4(), glm::vec3(0.15, 0.15, 0.15));
 
-	lightsource2 = initstructure(6, 9, 0, 30, 0, 2.0f, 0); // sphere that indicate light position
-	lightPosition2 = vec3(50.0f, 20.0f, 0.0f);
-	structureList[lightsource2]->scale = glm::scale(glm::mat4(), glm::vec3(0.15, 0.15, 0.15));
+	//lightsource2 = initstructure(6, 9, 0, 30, 0, 2.0f, 0); // sphere that indicate light position
+	LightSource2_ID = 6;
+	LightSource2_texture = 9;
+	LightSource2_location = vec3(50.0f, 20.0f, 0.0f);
+	LightSource2_transform = glm::mat4(1.0f);
+	LightSource2_scale = glm::scale(glm::mat4(), glm::vec3(0.15, 0.15, 0.15));
 
 
 	RockOri = structureCount; //initialise all the rocks
@@ -795,7 +818,6 @@ void initialiseEntities() {
 	for (int i = 0; i < 3; i++) {
 		RingStop = initstructure(5, 7, 0, +10, -10 + -30 * i, glm::rotate(mat4(), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)), 2.0f, 3);
 	}
-	//glm::scale(glm::mat4(), vec3(0.15,0.15,0.15))	*
 
 }
 
@@ -810,6 +832,24 @@ int checkCollision(structure* e1, structure* e2) {
 		handleExit(e1, e2);
 		handleExit(e2, e1);
 		return 2;
+	}
+	return 0;
+}
+
+int check_SC_Planet1_Collision() {
+	vec3 distance = SC_location - Planet1_location;
+	if (glm::length(distance) < SC_colRadius + Planet1_colRadius) {
+		SC_location =
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, planevelocity, 1.0f));
+	}
+	return 0;
+}
+
+int check_SC_Planet2_Collision() {
+	vec3 distance = SC_location - Planet2_location;
+	if (glm::length(distance) < SC_colRadius + Planet2_colRadius) {
+		SC_location =
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, planevelocity, 1.0f));
 	}
 	return 0;
 }
