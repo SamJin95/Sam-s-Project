@@ -3,12 +3,12 @@ c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(52): warning 
 c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(53): warning C4305: 'initializing': truncation from 'double' to 'float'
 c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(54): warning C4305: 'initializing': truncation from 'double' to 'float'
 c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(55): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(236): warning C4305: '-=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(240): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(244): warning C4305: '-=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(248): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(276): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(503): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(677): warning C4267: '=': conversion from 'size_t' to 'GLuint', possible loss of data
-c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(766): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(215): warning C4305: '-=': truncation from 'double' to 'float'
+c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(218): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(229): warning C4305: '-=': truncation from 'double' to 'float'
+c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(232): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(261): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(488): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(662): warning C4267: '=': conversion from 'size_t' to 'GLuint', possible loss of data
+c:\users\brian\documents\github\sam-s-project\project3260\main.cpp(751): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
   project3260.vcxproj -> C:\Users\Brian\Documents\GitHub\Sam-s-Project\x64\Debug\project3260.exe

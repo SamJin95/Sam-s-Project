@@ -208,45 +208,30 @@ void installShaders()
 
 void keyboard(unsigned char key, int x, int y)
 {
-	if (key == 'f')
-		lightPosition = lightPosition + vec3(-2.0f, 0.0f, 0.0f);
-	else if (key == 'h')
-		lightPosition = lightPosition + vec3(2.0f, 0.0f, 0.0f);
-	else if (key == 'g')
-		lightPosition = lightPosition + vec3(0.0f, 0.0f, 2.0f);
-	else if (key == 't')
-		lightPosition = lightPosition + vec3(0.0f, 0.0f, -2.0f);
-	else if (key == 'r')
-		lightPosition = lightPosition + vec3(0.0f, 2.0f, 0.0f);
-	else if (key == 'y')
-		lightPosition = lightPosition + vec3(0.0f, -2.0f, 0.0f);
-	else if (key == 'q') {
-		structureList[SpaceCraft]->location =
-			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, planevelocity, 0.0f, 1.0f));
-	}
-	else if (key == 'e') {
-		structureList[SpaceCraft]->location =
-			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, -planevelocity, 0.0f, 1.0f));
-	}
-	else if (key == 27) { // escape key to close the program
+	if (key == 27) { // esc
 		exit(0);
 	}
-	else if (key == 'u') {
-		if (diffuse > 0)
+	if (key == 'j') {
+		specular -= 0.1;
+	}
+	if (key == 'k') {
+		specular += 0.1;
+	}
+	if (key == 'w')
+		lightPosition = lightPosition + vec3(0.0f, 0.0f, 3.0f);
+	if (key == 'a')
+		lightPosition = lightPosition + vec3(-3.0f, 0.0f, 0.0f);
+	if (key == 's')
+		lightPosition = lightPosition + vec3(0.0f, 0.0f, -3.0f);
+	if (key == 'd')
+		lightPosition = lightPosition + vec3(3.0f, 0.0f, 0.0f);
+	if (key == 'u') {
 			diffuse -= 0.1;
 	}
-	else if (key == 'i') {
-		if (diffuse < 2)
+    if (key == 'i') {
 			diffuse += 0.1;
 	}
-	else if (key == 'j') {
-		if (specular > 0)
-			specular -= 0.1;
-	}
-	else if (key == 'k') {
-		if (specular < 2)
-			specular += 0.1;
-	}
+	
 }
 
 void move(int key, int x, int y) {
@@ -254,15 +239,15 @@ void move(int key, int x, int y) {
 		structureList[SpaceCraft]->location =
 			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(planevelocity, 0.0f, 0.0f, 1.0f));
 	}
-	else if (key == GLUT_KEY_LEFT) {
+	if (key == GLUT_KEY_LEFT) {
 		structureList[SpaceCraft]->location =
 			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(-planevelocity, 0.0f, 0.0f, 1.0f));
 	}
-	else if (key == GLUT_KEY_UP) {
+	if (key == GLUT_KEY_UP) {
 		structureList[SpaceCraft]->location =
 			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, 0.0f, -planevelocity, 1.0f));
 	}
-	else if (key == GLUT_KEY_DOWN) {
+	if (key == GLUT_KEY_DOWN) {
 		structureList[SpaceCraft]->location =
 			vec3(glm::translate(glm::mat4(), vec3(structureList[SpaceCraft]->location)) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, 0.0f, planevelocity, 1.0f));
 	}
@@ -272,11 +257,11 @@ float r = 0.0f;
 void PassiveMouse(int x, int y)
 {
 	//TODO: Use Mouse to do interactive events and animation
-	int moveX = x - glutGet(GLUT_WINDOW_WIDTH) / 2;
-	float angleX = moveX / (glutGet(GLUT_WINDOW_WIDTH) / 2.0) * 90.0;
+	int xoffset = x - glutGet(GLUT_WINDOW_WIDTH) / 2;
+	float angleX = xoffset / (glutGet(GLUT_WINDOW_WIDTH) / 2.0) * 90.0;
 	glutWarpPointer(glutGet(GLUT_WINDOW_WIDTH) / 2, glutGet(GLUT_WINDOW_HEIGHT) / 2);
 	structureList[SpaceCraft]->transform *= glm::rotate(glm::mat4(1.0f), glm::radians(angleX), glm::vec3(0.0f, 1.0f, 0.0f));
-	//printf("%d %.2f\n", moveX, angleX);
+
 }
 
 bool loadOBJ(
