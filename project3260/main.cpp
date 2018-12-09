@@ -1,7 +1,11 @@
-/************************
-SID: 1155046896 & 1155091693
-Name :Jin Xiamu & Cheng Brian Wing Hang
-**************************/
+/*********************************************************
+FILE : main.cpp (csci3260 2018-2019 Project)
+*********************************************************/
+/*********************************************************
+Student Information
+Student ID: 1155092438 & 1155093276
+Student Name: Jin Xiamu & Cheng Brian Wing Hang
+*********************************************************/
 
 #define _CRT_SECURE_NO_WARNINGS
 #include "Dependencies\glew\glew.h"
@@ -21,35 +25,34 @@ using glm::mat4;
 
 GLint PID;
 
-const int Objectnum = 20;
-const int Texturenum = 20;
+const int OBJECT_NUM = 20;
+const int TEXTURE_NUM = 20;
 
 //constant bit flags for indicating status of objects
-const int seeable = 2;
-const int hittable = 4;
-const int outside = 8;
+const int VISIABLE = 2;
+const int COLLIDABLE = 4;
+const int OUTSIDE = 8;
 
 
 //storing the index of the entities
-int RingOri, RingStop;
-int RockOri, RockStop;
-float planevelocity = 0.4f;
-const float rockvelocity = 0.02f;
-const float planeRotAng = 0.002f;
-const float ringspin = 0.002f;
-const float rockspin = 0.001f;
+float SC_SPEED = 0.6f;
+const float ROCK_SPEED = 0.02f;
+const float SC_ANG = 0.002f;
+const float RING_ANG = 0.002f;
+const float ROCK_ANG = 0.001f;
 
-int Planet1_ID, Planet2_ID, SC_ID, LightSource1_ID, LightSource2_ID;
-int Planet1_texture, Planet2_texture, SC_texture, LightSource1_texture, LightSource2_texture;
-vec3 Planet1_location, Planet2_location, SC_location, LightSource1_location, LightSource2_location;
-glm::mat4 Planet1_transform, Planet2_transform, SC_transform, LightSource1_transform, LightSource2_transform;
-float Planet1_colRadius, Planet2_colRadius, SC_colRadius;
-int Planet1_colHandler, Planet2_colHandler, SC_colHandler;
-int Planet1_status, Planet2_status, SC_status;
-glm::mat4 Planet1_scale, Planet2_scale, SC_scale, LightSource1_scale, LightSource2_scale;
+int Planet1_ID, Planet2_ID, SC_ID, LightSource1_ID, LightSource2_ID, Ring_ID, Rock_ID;
+int Planet1_texture, Planet2_texture, SC_texture, LightSource1_texture, LightSource2_texture, Ring_texture[4], Rock_texture;
+vec3 Planet1_location, Planet2_location, SC_location, LightSource1_location, LightSource2_location, Ring_location[4], Rock_location[200];
+glm::mat4 Planet1_transform, Planet2_transform, SC_transform, LightSource1_transform, LightSource2_transform, Ring_transform, Rock_transform[200];
+float Planet1_colRadius, Planet2_colRadius, SC_colRadius, Ring_colRadius, Rock_colRadius;
+int Planet1_colHandler, Planet2_colHandler, SC_colHandler, Ring_colHandler[4], Rock_colHandler;
+int Planet1_status, Planet2_status, SC_status, Ring_status[4], Rock_status[200];
+glm::mat4 Planet1_scale, Planet2_scale, SC_scale, LightSource1_scale, LightSource2_scale, Ring_scale, Rock_scale;
+float Rock_orbitRadius[200], Rock_radian[200], Rock_orbitVoffset[200];
+vec3 Rock_orbitCentre[200];
 
-
-//stroring gobal game state variables
+//stroring global game state variables
 
 glm::vec3 camPos = glm::vec3(0.0, 20.0, 20.0);
 float ax = 0.0f;
@@ -58,51 +61,28 @@ float specular = 0.8; //specular light intensity
 float diffuse2 = 0.8; //diffuse light intensity
 float specular2 = 0.8;
 
-//vao vbos
-GLuint textureID[Texturenum];
-GLuint VertexArrayID[Objectnum];
-GLuint vertexbuffer[Objectnum];
-GLuint uvbuffer[Objectnum];
-GLuint normalbuffer[Objectnum];
-GLuint drawSize[Objectnum];
+GLuint textureID[TEXTURE_NUM];
+GLuint VertexArrayID[OBJECT_NUM];
+GLuint vertexbuffer[OBJECT_NUM];
+GLuint uvbuffer[OBJECT_NUM];
+GLuint normalbuffer[OBJECT_NUM];
+GLuint drawSize[OBJECT_NUM];
 
-//entities system
-typedef struct structure {
-	int ObjId;
-	int texture;
-	float collisionRadius;
-	int collisionHandler;
-	vec3 location;
-	glm::mat4 transform; //for aditional scaling or rotational visual transform
-	int status;
-	float orbitRadius;
-	float radian;
-	float orbitVOffset;
-	vec3 orbitCentre;
-	glm::mat4 scale;
-}structure;
-
-structure* structureList[400];
-int structureCount = 0;
-
-//custom function prototypes
 void bufferObject(int objectID, const char * Path);
 void LightSetup();
 void drawTextureObject(int index, int Texture, glm::mat4 transformMatrix, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
-int initstructure(int ObjId, int texture, int x, int y, int z, float radius, int collisionHandler);
 void drawSpaceCraft(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 void drawPlanet1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 void drawPlanet2(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 void drawLightSource1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 void drawLightSource2(glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
-void drawstructure(structure* e, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
-int checkCollision(structure * e1, structure * e2);
+void drawRock(int i, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+void drawRing(int i, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
 int check_SC_Planet1_Collision();
 int check_SC_Planet2_Collision();
-int handleCollision(structure * primary, structure * secondary);
-int handleExit(structure * primary, structure * secondary);
-int initstructure(int ObjId, int texture, int x, int y, int z, glm::mat4 transform, float radius, int collisionHandler);
-int initRock(float radiusMin, float radiusMax, float vOffset, vec3 centre);
+int check_SC_Rock_Collision(int i);
+int check_SC_Ring_Collision(int i);
+int initRock(int i, float min_radius, float max_raduis, float v_offset, vec3 orbitCentre);
 
 
 
@@ -178,19 +158,15 @@ string readShaderCode(const char* fileName)
 	);
 }
 
-//need installCubeShader *Brian
-
 void installShaders()
 {
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
 	const GLchar* adapter[1];
-	//adapter[0] = vertexShaderCode;
 	string temp = readShaderCode("VertexShaderCode.glsl");
 	adapter[0] = temp.c_str();
 	glShaderSource(vertexShaderID, 1, adapter, 0);
-	//adapter[0] = fragmentShaderCode;
 	temp = readShaderCode("FragmentShaderCode.glsl");
 	adapter[0] = temp.c_str();
 	glShaderSource(fragmentShaderID, 1, adapter, 0);
@@ -236,10 +212,19 @@ void keyboard(unsigned char key, int x, int y)
 	if (key == 'd')
 		LightSource1_location = LightSource1_location + vec3(3.0f, 0.0f, 0.0f);
 	if (key == 'u') {
-			diffuse -= 0.1;
+		diffuse -= 0.1;
 	}
     if (key == 'i') {
-			diffuse += 0.1;
+		diffuse += 0.1;
+	}
+
+	if (key == 'q') {
+		SC_location =
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, SC_SPEED, 0.0f, 1.0f));
+	}
+	if (key == 'e') {
+		SC_location =
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, -SC_SPEED, 0.0f, 1.0f));
 	}
 	
 }
@@ -247,19 +232,19 @@ void keyboard(unsigned char key, int x, int y)
 void SpecialKeys(int key, int x, int y) {
 	if (key == GLUT_KEY_RIGHT) {
         SC_location =
-			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(planevelocity, 0.0f, 0.0f, 1.0f));
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(SC_SPEED, 0.0f, 0.0f, 1.0f));
 	}
 	if (key == GLUT_KEY_LEFT) {
 		SC_location =
-			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(-planevelocity, 0.0f, 0.0f, 1.0f));
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(-SC_SPEED, 0.0f, 0.0f, 1.0f));
 	}
 	if (key == GLUT_KEY_UP) {
 		SC_location =
-			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, -planevelocity, 1.0f));
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, -SC_SPEED, 1.0f));
 	}
 	if (key == GLUT_KEY_DOWN) {
 		SC_location =
-			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, planevelocity, 1.0f));
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, SC_SPEED, 1.0f));
 	}
 }
  
@@ -420,27 +405,18 @@ GLuint loadBMP_custom(const char * imagepath) {
 
 void sendDataToOpenGL()
 {
-	//Generate buffers
-	glGenVertexArrays(Objectnum, VertexArrayID);
-	glGenBuffers(Objectnum, vertexbuffer);
-	glGenBuffers(Objectnum, uvbuffer);
-	glGenBuffers(Objectnum, normalbuffer);
+	glGenVertexArrays(OBJECT_NUM, VertexArrayID);
+	glGenBuffers(OBJECT_NUM, vertexbuffer);
+	glGenBuffers(OBJECT_NUM, uvbuffer);
+	glGenBuffers(OBJECT_NUM, normalbuffer);
 
-	//Load texture
-	//textureID[0] = loadBMP_custom("objecttexture\\jeep_texture.bmp");
-	//textureID[1] = loadBMP_custom("objecttexture\\block_texture.bmp");
-	textureID[2] = loadBMP_custom("objecttexture\\texture\\spacecraftTexture.bmp");
-	textureID[3] = loadBMP_custom("objecttexture\\texture\\WonderStarTexture.bmp");
-	textureID[4] = loadBMP_custom("objecttexture\\texture\\RockTexture.bmp");
-	textureID[5] = loadBMP_custom("objecttexture\\texture\\earthTexture.bmp");
-	//textureID[6] = loadBMP_custom("objecttexture\\white_texture.bmp");
-	textureID[7] = loadBMP_custom("objecttexture\\texture\\ringTexture.bmp");
-	textureID[8] = loadBMP_custom("objecttexture\\texture\\RockTexture.bmp");
-	textureID[9] = loadBMP_custom("objecttexture\\texture\\RockTexture.bmp");
-	//Load obj files
-	//bufferObject(0, "objecttexture\\block.obj");
+	textureID[0] = loadBMP_custom("objecttexture\\texture\\spacecraftTexture.bmp");
+	textureID[1] = loadBMP_custom("objecttexture\\texture\\WonderStarTexture.bmp");
+	textureID[2] = loadBMP_custom("objecttexture\\texture\\RockTexture.bmp");
+	textureID[3] = loadBMP_custom("objecttexture\\texture\\earthTexture.bmp");
+	textureID[4] = loadBMP_custom("objecttexture\\texture\\ringTexture.bmp");
+
 	bufferObject(1, "objecttexture\\spaceCraft.obj");
-	//bufferObject(2, "objecttexture\\plane.obj");
 	bufferObject(3, "objecttexture\\rock.obj");
 	bufferObject(4, "objecttexture\\planet.obj");
 	bufferObject(5, "objecttexture\\ring.obj");
@@ -451,30 +427,17 @@ void sendDataToOpenGL()
 
 void paintGL(void)
 {
-	//General Upkeepings
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.05f, 0.05f, 0.15f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	ax += 0.1;
 	LightSetup();
-
-	//Set transformation matrix
-
-	//set up projection matrix
 	glm::mat4 projectionMatrix = glm::mat4(1.0f);
 	projectionMatrix = glm::perspective((float)glm::radians(90.0f), 1.0f / 1.0f, 0.5f, 200.0f);
-
-	//update structure state and location etc
-	//make a sphere follow the light source
-	//make the camera follow the plane
-	//camPos = vec3(glm::translate(glm::mat4(), vec3(0.0f, +10.0f, +10.0f)) * glm::vec4(structureList[SpaceCraft]->location,0.0));
 	camPos = vec3(SC_transform * glm::translate(glm::mat4(), vec3(0.0f, +5.0f, +5.0f)) * glm::vec4(1.0));
 	camPos = vec3(glm::translate(glm::mat4(), SC_location) * glm::vec4(camPos, 1.0));
-	//camPos = vec3(glm::translate(glm::mat4(), structureList[SpaceCraft]->location) * structureList[SpaceCraft]->transform *  glm::vec4(0.0f, +10.0f, +10.0f,1.0));
-	//camPos = vec3(x, x, x);
 
-	//send eye position
 	GLint eyePosUniformLocation = glGetUniformLocation(PID, "LookLocation");
 	glm::vec4 campos4v = glm::vec4(camPos, 0.0);
 	glUniform4fv(eyePosUniformLocation, 1, &campos4v[0]);
@@ -482,66 +445,65 @@ void paintGL(void)
 	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(camPos), glm::vec3(SC_location), glm::vec3(0.0f, 1.0f, 0.0f));
 
 
-																										 //make the rock oribts
-	for (int i = RockOri; i <= RockStop; i++) {
-		structureList[i]->radian += rockvelocity / structureList[i]->orbitRadius;
-		structureList[i]->location = vec3(glm::translate(glm::mat4(), structureList[i]->orbitCentre)
-			* glm::translate(glm::mat4(), vec3(0.0f, structureList[i]->orbitVOffset, 0.0f))
-			* glm::rotate(mat4(), structureList[i]->radian, glm::vec3(0.0f, 1.0f, 0.0f))
-			* glm::translate(glm::mat4(), vec3(structureList[i]->orbitRadius, 0.0f, 0.0f))
+	for (int i = 0; i < 200; i++) {
+		Rock_radian[i] += ROCK_SPEED / Rock_orbitRadius[i];
+		Rock_location[i] = vec3(glm::translate(glm::mat4(), Rock_orbitCentre[i])
+			* glm::translate(glm::mat4(), vec3(0.0f, Rock_orbitVoffset[i], 0.0f))
+			* glm::rotate(mat4(), Rock_radian[i], glm::vec3(0.0f, 1.0f, 0.0f))
+			* glm::translate(glm::mat4(), vec3(Rock_orbitRadius[i], 0.0f, 0.0f))
 			* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-		structureList[i]->transform = glm::rotate(mat4(), rockspin, glm::vec3(0.0f, 1.0f, 0.0f)) *  structureList[i]->transform;
+		Rock_transform[i] = glm::rotate(mat4(), ROCK_ANG, glm::vec3(0.0f, 1.0f, 0.0f)) *  Rock_transform[i];
 	}
 
-	//rotate the planets
-	Planet1_transform = glm::rotate(mat4(), planeRotAng, glm::vec3(0.0f, 1.0f, 0.0f)) *  Planet1_transform;
-	Planet2_transform = glm::rotate(mat4(), planeRotAng, glm::vec3(0.0f, 1.0f, 0.0f)) *  Planet2_transform;
+	Planet1_transform = glm::rotate(mat4(), SC_ANG, glm::vec3(0.0f, 1.0f, 0.0f)) *  Planet1_transform;
+	Planet2_transform = glm::rotate(mat4(), SC_ANG, glm::vec3(0.0f, 1.0f, 0.0f)) *  Planet2_transform;
 
-	for (int i = RingOri; i <= RingStop; i++) {
-		structureList[i]->transform = glm::rotate(mat4(), ringspin, glm::vec3(0.0f, 1.0f, 0.0f)) *  structureList[i]->transform;
-	}
+	Ring_transform = glm::rotate(mat4(), RING_ANG, glm::vec3(0.0f, 1.0f, 0.0f)) *  Ring_transform;
 
-	//centralised drawing and collision detection for each structure
-	for (int i = 0; i < structureCount; i++) {
-		if (structureList[i]->status & seeable)
-			drawstructure(structureList[i], viewMatrix, projectionMatrix);
-		if (structureList[i]->status & hittable) {
-			for (int j = i; j < structureCount; j++) {
-				if (structureList[j]->status & hittable)
-					checkCollision(structureList[i], structureList[j]);
-			}
-		}
-
-	}
-
-	if (SC_status & seeable) {
+	if (SC_status & VISIABLE) {
 		drawSpaceCraft(viewMatrix, projectionMatrix);
 	}
 
-	if (Planet1_status & seeable) {
+	if (Planet1_status & VISIABLE) {
 		drawPlanet1(viewMatrix, projectionMatrix);
 	}
-	if (Planet1_status & hittable) {
+	if (Planet1_status & COLLIDABLE) {
 		check_SC_Planet1_Collision();
 	}
 
-	if (Planet2_status & seeable) {
+	if (Planet2_status & VISIABLE) {
 		drawPlanet2(viewMatrix, projectionMatrix);
 	}
-	if (Planet2_status & hittable) {
+	if (Planet2_status & COLLIDABLE) {
 		check_SC_Planet2_Collision();
 	}
 	drawLightSource1(viewMatrix, projectionMatrix);
 	drawLightSource2(viewMatrix, projectionMatrix);
 
-	//post drawing upkeeping
+	for (int i = 0; i < 200; i++) {
+		if (Rock_status[i] & VISIABLE) {
+			drawRock(i, viewMatrix, projectionMatrix);
+		}
+		if (Rock_status[i] & COLLIDABLE) {
+			check_SC_Rock_Collision(i);
+		}
+	}
+
+	for (int i = 0; i < 4; i++) {
+		if (Ring_status[i] & VISIABLE) {
+			drawRing(i, viewMatrix, projectionMatrix);
+		}
+		if (Ring_status[i] & COLLIDABLE) {
+			check_SC_Ring_Collision(i);
+		}
+	}
+
 	glFlush();
 	glutPostRedisplay();
 }
 
 void LightSetup()
 {
-	//Set up lighting information for source 1
 	GLint lightPositonUniformLocation = glGetUniformLocation(PID, "LightLocation");
 	glUniform3fv(lightPositonUniformLocation, 1, &LightSource1_location[0]);
 
@@ -558,7 +520,6 @@ void LightSetup()
 	glm::vec4 speLight(specular, specular, specular, 0.0f);
 	glUniform4fv(speLightUniformLocation, 1, &speLight[0]);
 
-	//light souce 2
 	GLint lightPositonUniformLocation2 = glGetUniformLocation(PID, "LightLocation2");
 	glUniform3fv(lightPositonUniformLocation2, 1, &LightSource2_location[0]);
 
@@ -669,56 +630,28 @@ void drawTextureObject(int index, int Texture, glm::mat4 transformMatrix, glm::m
 
 }
 
-int initstructure(int ObjId, int texture, int x, int y, int z, float radius, int collisionHandler) {
-	return initstructure(ObjId, texture, x, y, z, glm::mat4(1.0f), radius, collisionHandler);
-}
+int initRock(int i, float min_radius, float max_radius, float v_offset, vec3 orbitCentre) {
+	float ang_X, ang_Y, ang_Z;
+	ang_X = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 360;
+	ang_Y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 360;
+	ang_Z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 360;
+	//int i = initstructure(3, 4, 0, 0, 0, 2, 2);
+	Rock_transform[i] = glm::rotate(mat4(), glm::radians(ang_X), glm::vec3(1.0f, 0.0f, 0.0f))
+		*glm::rotate(mat4(), glm::radians(ang_Y), glm::vec3(0.0f, 1.0f, 0.0f))
+		*glm::rotate(mat4(), glm::radians(ang_Z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-int initstructure(int ObjId, int texture, int x, int y, int z, glm::mat4 transform, float radius, int collisionHandler)
-{
-	//initialise entities
-	structure* e = (structure*)malloc(sizeof(structure));
-	e->ObjId = ObjId;
-	e->texture = texture;
-	e->location = vec3(x, y, z);
-	e->transform = transform;
-	e->collisionRadius = radius;
-	e->collisionHandler = collisionHandler;
-	structureList[structureCount] = e;
-	structureCount++;
-	e->status = seeable | hittable;
-	e->scale = glm::mat4(1.0f);
-	return structureCount - 1;
-}
+	Rock_orbitRadius[i] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * (max_radius - min_radius) + min_radius;
+	Rock_radian[i] = glm::radians(static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 360);
+	Rock_orbitVoffset[i] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 2 * v_offset - v_offset;
+	Rock_orbitCentre[i] = orbitCentre;
 
-
-int initRock(float radiusMin, float radiusMax, float vOffset, vec3 centre) {
-	float turnx, turny, turnz;
-	turnx = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 360;
-	turny = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 360;
-	turnz = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 360;
-	int i = initstructure(3, 4, 0, 0, 0, 2, 2);
-	structureList[i]->transform = glm::rotate(mat4(), glm::radians(turnx), glm::vec3(1.0f, 0.0f, 0.0f))
-		*glm::rotate(mat4(), glm::radians(turny), glm::vec3(0.0f, 1.0f, 0.0f))
-		*glm::rotate(mat4(), glm::radians(turnz), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	structureList[i]->orbitRadius = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * (radiusMax - radiusMin) + radiusMin;
-	structureList[i]->radian = glm::radians(static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 360);
-	structureList[i]->orbitVOffset = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 2 * vOffset - vOffset;
-	structureList[i]->orbitCentre = centre;
-
-	structureList[i]->location = vec3(glm::translate(glm::mat4(), structureList[i]->orbitCentre)
-		* glm::translate(glm::mat4(), vec3(0.0f, structureList[i]->orbitVOffset, 0.0f))
-		* glm::rotate(mat4(), structureList[i]->radian, glm::vec3(0.0f, 1.0f, 0.0f))
-		* glm::translate(glm::mat4(), vec3(structureList[i]->orbitRadius, 0.0f, 0.0f))
+	Rock_location[i] = vec3(glm::translate(glm::mat4(), Rock_orbitCentre[i])
+		* glm::translate(glm::mat4(), vec3(0.0f, Rock_orbitVoffset[i], 0.0f))
+		* glm::rotate(mat4(), Rock_radian[i], glm::vec3(0.0f, 1.0f, 0.0f))
+		* glm::translate(glm::mat4(), vec3(Rock_orbitRadius[i], 0.0f, 0.0f))
 		* glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
-	return i;
-}
-
-void drawstructure(structure* e, glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
-	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
-	modelTransformMatrix = glm::translate(mat4(), glm::vec3(e->location.x, e->location.y, e->location.z)) * e->transform * e->scale;
-	drawTextureObject(e->ObjId, e->texture, modelTransformMatrix, viewMatrix, projectionMatrix);
+	return 0;
 }
 
 void drawPlanet1(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
@@ -751,11 +684,22 @@ void drawLightSource2(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
 	drawTextureObject(LightSource2_ID, LightSource2_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
 }
 
+void drawRock(int i, glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
+	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
+	modelTransformMatrix = glm::translate(mat4(), glm::vec3(Rock_location[i].x, Rock_location[i].y, Rock_location[i].z)) * Rock_transform[i] * Rock_scale;
+	drawTextureObject(Rock_ID, Rock_texture, modelTransformMatrix, viewMatrix, projectionMatrix);
+}
+
+void drawRing(int i, glm::mat4 viewMatrix, glm::mat4 projectionMatrix) {
+	glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
+	modelTransformMatrix = glm::translate(mat4(), glm::vec3(Ring_location[i].x, Ring_location[i].y, Ring_location[i].z)) * Ring_transform * Ring_scale;
+	drawTextureObject(Ring_ID, Ring_texture[i], modelTransformMatrix, viewMatrix, projectionMatrix);
+}
+
 void initializedGL(void) //run only once
 {
 	glewInit();
 	installShaders();
-	//need run installCubeShader ****Brian
 	sendDataToOpenGL();
 }
 
@@ -763,84 +707,73 @@ void initializedGL(void) //run only once
 void initialiseEntities() {
 
 	srand(time(NULL));
-	//SpaceCraft = initstructure(1, 2, 0, 10, 0, 4.5f, 1); //the plane
 	SC_ID = 1;
-	SC_texture = 2;
+	SC_texture = 0;
 	SC_location = vec3(0, 10, 0);
 	SC_transform = glm::mat4(1.0f);
 	SC_colRadius = 4.5f;
 	SC_colHandler = 1;
-	SC_status = seeable | hittable;
+	SC_status = VISIABLE | COLLIDABLE;
 	SC_scale = mat4(1.0f);
 
-	//Planet1 = initstructure(4, 5, -100, 10, 0, 23.0f, 2); // the earth
 	Planet1_ID = 4;
-	Planet1_texture = 5;
+	Planet1_texture = 3;
 	Planet1_location = vec3(-100, 10, 0);
 	Planet1_transform = glm::mat4(1.0f);
 	Planet1_colRadius = 23.0f;
 	Planet1_colHandler = 2;
-	Planet1_status = seeable | hittable;
+	Planet1_status = VISIABLE | COLLIDABLE;
 	Planet1_scale = mat4(1.0f);
 
-
-	//Planet2 = initstructure(4, 3, +100, 10, 0, 23.0f, 2); // the wonder planet
 	Planet2_ID = 4;
-	Planet2_texture = 3;
+	Planet2_texture = 1;
 	Planet2_location = vec3(+100, 10, 0);
 	Planet2_transform = glm::mat4(1.0f);
 	Planet2_colRadius = 23.0f;
 	Planet2_colHandler = 2;
-	Planet2_status = seeable | hittable;
+	Planet2_status = VISIABLE | COLLIDABLE;
 	Planet2_scale = mat4(1.0f);
 
-	//lightsource = initstructure(6, 9, 0, 30, 0, 2.0f, 0); // sphere that indicate light position
 	LightSource1_ID = 6;
-	LightSource1_texture = 9;
+	LightSource1_texture = 2;
 	LightSource1_location = vec3(0.0f, 40.0f, 0.0f);
 	LightSource1_transform = glm::mat4(1.0f);
 	LightSource1_scale = glm::scale(glm::mat4(), glm::vec3(0.15, 0.15, 0.15));
 
-	//lightsource2 = initstructure(6, 9, 0, 30, 0, 2.0f, 0); // sphere that indicate light position
 	LightSource2_ID = 6;
-	LightSource2_texture = 9;
+	LightSource2_texture = 2;
 	LightSource2_location = vec3(50.0f, 20.0f, 0.0f);
 	LightSource2_transform = glm::mat4(1.0f);
 	LightSource2_scale = glm::scale(glm::mat4(), glm::vec3(0.15, 0.15, 0.15));
 
-
-	RockOri = structureCount; //initialise all the rocks
+	Rock_ID = 3;
+	Rock_texture = 2;
+	Rock_colRadius = 2;
+	Rock_colHandler = 2;
+	Rock_scale = mat4(1.0f);
 	for (int i = 0; i < 200; i++) {
-		RockStop = initRock(60.0f, 90.0f, 7.0f, Planet2_location);
+		Rock_status[i] = VISIABLE | COLLIDABLE;
+		initRock(i, 60.0f, 90.0f, 7.0f, Planet2_location);
 	}
 
-	RingOri = structureCount;//initialise all the rings
-	for (int i = 0; i < 3; i++) {
-		RingStop = initstructure(5, 7, 0, +10, -10 + -30 * i, glm::rotate(mat4(), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)), 2.0f, 3);
+	Ring_ID = 5;
+	Ring_transform = glm::rotate(mat4(), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	Ring_colRadius = 2.0f;
+	Ring_scale = mat4(1.0f);
+	for (int i = 0; i < 4; i++) {
+		Ring_texture[i] = 4;
+		Ring_colHandler[i] = 3;
+		Ring_status[i] = VISIABLE | COLLIDABLE;
+		Ring_location[i] = vec3(0, +10, -10 + -30 * i);
 	}
 
-}
-
-int checkCollision(structure* e1, structure* e2) {
-	vec3 distance = e1->location - e2->location;
-	if (glm::length(distance) < e1->collisionRadius + e2->collisionRadius) {
-		handleCollision(e1, e2);
-		handleCollision(e2, e1);
-		return 1;
-	}
-	else if (e1->status & outside || e2->status & outside) {
-		handleExit(e1, e2);
-		handleExit(e2, e1);
-		return 2;
-	}
-	return 0;
 }
 
 int check_SC_Planet1_Collision() {
 	vec3 distance = SC_location - Planet1_location;
 	if (glm::length(distance) < SC_colRadius + Planet1_colRadius) {
 		SC_location =
-			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, planevelocity, 1.0f));
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, SC_SPEED, 1.0f));
 	}
 	return 0;
 }
@@ -849,35 +782,38 @@ int check_SC_Planet2_Collision() {
 	vec3 distance = SC_location - Planet2_location;
 	if (glm::length(distance) < SC_colRadius + Planet2_colRadius) {
 		SC_location =
-			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, planevelocity, 1.0f));
+			vec3(glm::translate(glm::mat4(), vec3(SC_location)) * SC_transform *  glm::vec4(0.0f, 0.0f, SC_SPEED, 1.0f));
 	}
 	return 0;
 }
 
-int handleCollision(structure* primary, structure* secondary) {
-	if (primary->collisionHandler == 1 && secondary->collisionHandler == 2) {
-		secondary->status = 0;
-	}
-	if (primary->collisionHandler == 1 && secondary->collisionHandler == 3) {
-		secondary->status = secondary->status | outside;
-		secondary->texture = 8;
-		primary->texture = 8;
-		secondary->collisionHandler = 4;
-	}
-	if (primary->collisionHandler == 1 && secondary->collisionHandler == 6) {
-		secondary->status = 0;
-		secondary->collisionHandler = 0;
-		planevelocity += 0.7f;
+int check_SC_Rock_Collision(int i) {
+	vec3 distance = SC_location - Rock_location[i];
+	if (glm::length(distance) < SC_colRadius + Rock_colRadius) {
+		Rock_status[i] = 0;
+		SC_SPEED *= 0.9;
 	}
 	return 0;
 }
 
-int handleExit(structure* primary, structure* secondary) {
-	if (primary->collisionHandler == 1 && secondary->collisionHandler == 4) {
-		secondary->status = secondary->status ^ outside;
-		secondary->texture = 7;
-		primary->texture = 2;
-		secondary->collisionHandler = 3;
+int check_SC_Ring_Collision(int i) {
+	vec3 distance = SC_location - Ring_location[i];
+	if (glm::length(distance) < SC_colRadius + Ring_colRadius) {
+		if (Ring_colHandler[i] == 3) {
+			Ring_status[i] = Ring_status[i] | OUTSIDE;
+			Ring_texture[i] = 2;
+			SC_texture = 2;
+			Ring_colHandler[i] = 4;
+		}
+	}
+	else if (Ring_status[i] & OUTSIDE) {
+		if (Ring_colHandler[i] == 4) {
+			Ring_status[i] = Ring_status[i] ^ OUTSIDE;
+			Ring_texture[i] = 4;
+			SC_texture = 0;
+			Ring_colHandler[i] = 3;
+			SC_SPEED += 0.1f;
+		}
 	}
 	return 0;
 }
